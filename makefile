@@ -3,19 +3,22 @@ $(info MAKELEVEL = $(MAKELEVEL))
 
 CC = /usr/bin/gcc
 
-main: main.o
+NAMES = main hello
+DEP = $(foreach name,$(NAMES),$(name).d)
+OBJ = $(foreach name,$(NAMES),$(name).o)
+main: $(OBJ)
 
 ifeq ($(MAKELEVEL),0)
 main:
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-main.h: main.h.txt
+%.h: %.h.txt
 	cp $< $@
 
-main.d: main.c
+%.d: %.c
 	$(CC) -MM -MG $(CPPFLAGS) $< | sed 's,\($*\.o\)\s*:\s*,\1 $@: ,' > $@
 
-main.o: main.c
+%.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 INCLUDES_TARGET = .includes.mk
@@ -30,7 +33,7 @@ $(INCLUDES_TARGET): $(INCLUDES_PREREQS)
 
 include $(INCLUDES_TARGET)
 else
-main.o main.d: FORCE
+$(DEP) $(OBJ): FORCE
 	echo include $(patsubst %.o,%.d,$@)
 
 .SUFFIXES:
@@ -42,8 +45,8 @@ endif
 clean: FORCE
 	rm -f $(INCLUDES_TARGET)
 	rm -f main
-	rm -f main.d
-	rm -f main.h
-	rm -f main.o
+	rm -f *.d
+	rm -f *.h
+	rm -f *.o
 
 FORCE:
