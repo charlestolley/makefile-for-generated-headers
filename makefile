@@ -1,5 +1,4 @@
 CC = /usr/bin/gcc
-CPPFLAGS = -MMD
 
 main: main.o
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
@@ -7,10 +6,13 @@ main: main.o
 main.h: main.h.txt
 	cp $< $@
 
+main.d: main.c
+	$(CC) -MM -MG $(CPPFLAGS) $< | sed 's,\($*\.o\)\s*:\s*,\1 $@: ,' > $@
+
 main.o: main.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
-include $(wildcard main.d)
+include main.d
 
 .PHONY: FORCE clean
 clean: FORCE
