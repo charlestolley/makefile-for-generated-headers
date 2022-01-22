@@ -11,9 +11,6 @@ $(error Cannot combine real and phony goals: "$(MAKECMDGOALS)")
 endif
 endif
 
-$(info MAKE_RESTARTS = $(MAKE_RESTARTS))
-$(info MAKELEVEL = $(MAKELEVEL))
-
 CC = /usr/bin/gcc
 
 NAMES = main hello
@@ -29,7 +26,7 @@ main:
 	cp $< $@
 
 %.d: %.c
-	$(CC) -MM -MG $(CPPFLAGS) $< | sed 's,\($*\.o\)\s*:\s*,\1 $@: ,' > $@
+	@$(CC) -MM -MG $(CPPFLAGS) $< | sed 's,\($*\.o\)\s*:\s*,\1 $@: ,' > $@
 
 %.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
@@ -39,9 +36,9 @@ INCLUDES_PREREQS = FORCE
 endif
 
 $(INCLUDES_TARGET): $(INCLUDES_PREREQS)
-	$(MAKE) $(MAKECMDGOALS) > $@.tmp || touch $@.tmp
-	grep "^include .*\.d\$$" $@.tmp | sort -u > $@
-	rm $@.tmp
+	@$(MAKE) $(MAKECMDGOALS) > $@.tmp || touch $@.tmp
+	@grep "^include .*\.d\$$" $@.tmp | sort -u > $@
+	@rm $@.tmp
 
 ifeq ($(PHONY_GOALS),)
 include $(INCLUDES_TARGET)
@@ -49,16 +46,16 @@ endif
 
 else
 $(DEP) $(OBJ): FORCE
-	echo include $(patsubst %.o,%.d,$@)
+	@echo include $(patsubst %.o,%.d,$@)
 
 .SUFFIXES:
 .DEFAULT:
-	true
+	@true
 endif
 
 .PHONY: $(PHONY)
 clean: FORCE
-	rm -f $(INCLUDES_TARGET)
+	@rm -f $(INCLUDES_TARGET)
 	rm -f main
 	rm -f *.d
 	rm -f *.h
