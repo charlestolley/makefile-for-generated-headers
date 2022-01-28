@@ -35,10 +35,15 @@ ifeq ($(MAKE_RESTARTS),)
 INCLUDES_PREREQS = FORCE
 endif
 
-$(INCLUDES_TARGET): $(INCLUDES_PREREQS)
-	@$(MAKE) $(MAKECMDGOALS) > $@.tmp || touch $@.tmp
-	@grep "^include .*\.d\$$" $@.tmp | sort -u > $@
-	@rm $@.tmp
+.INTERMEDIATE: $(INCLUDES_TARGET).tmp
+$(INCLUDES_TARGET).tmp: $(INCLUDES_PREREQS)
+	@$(MAKE) $(MAKECMDGOALS) > $@ || touch $@
+
+$(INCLUDES_TARGET): $(INCLUDES_TARGET).tmp
+	@echo "ifneq (\$$(MAKE_RESTARTS),)" > $@
+	@grep "^include .*\.d\$$" $< | sort -u >> $@
+	@echo "endif" >> $@
+	@rm $<
 
 ifeq ($(PHONY_GOALS),)
 include $(INCLUDES_TARGET)
