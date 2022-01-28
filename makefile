@@ -26,7 +26,7 @@ main:
 	cp $< $@
 
 %.d: %.c
-	@$(CC) -MM -MG $(CPPFLAGS) $< | sed 's,\($*\.o\)\s*:\s*,\1 $@: ,' > $@
+	@$(CC) -MM -MG -MT "$*.o $@" $(CPPFLAGS) $< > $@
 
 %.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
